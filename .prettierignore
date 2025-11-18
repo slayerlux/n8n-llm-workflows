@@ -1,0 +1,7 @@
+node_modules
+dist
+n8n_data
+*.log
+coverage
+.env
+.env.local

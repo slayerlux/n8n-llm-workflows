@@ -1,0 +1,199 @@
+{
+  "name": "05 - URL Q&A (Agent Node over pre-fetched content)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent-url-tools",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "webhook-agent-url",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [200, 300],
+      "webhookId": "agent-url-tools-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse input for URL Q&A.\n// Webhook sends the parsed request body as $json or $json.body.\nconst root = $json ?? {};\nconst body = (root.body && typeof root.body === 'object') ? root.body : root;\n\nconst url = body.url ?? root.url;\nconst question = body.question ?? root.question;\nconst language = body.language ?? root.language ?? null;\n\nif (!url || typeof url !== 'string' || !url.trim()) {\n  throw new Error('Missing body.url');\n}\n\nif (!question || typeof question !== 'string' || !question.trim()) {\n  throw new Error('Missing body.question');\n}\n\nreturn [{\n  json: {\n    url: url.trim(),\n    question: question.trim(),\n    language,\n  },\n}];"
+      },
+      "id": "parse-input",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "options": {
+          "timeout": 30000,
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "fetch-url-content",
+      "name": "Fetch URL Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract text content from HTML or return as-is.\nconst data = $json.data ?? $json.body ?? '';\nconst contentType = ($json.headers?.['content-type'] ?? '').toLowerCase();\n\nlet extractedText = '';\n\nconst decodeEntities = (value) => {\n  return value\n    .replace(/&nbsp;/g, ' ')\n    .replace(/&amp;/g, '&')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/&quot;/g, '\"');\n};\n\nif (contentType.includes('application/json')) {\n  extractedText = typeof data === 'string' ? data : JSON.stringify(data, null, 2);\n} else if (contentType.includes('text/html') || (typeof data === 'string' && data.includes('<html'))) {\n  let html = typeof data === 'string' ? data : JSON.stringify(data);\n  html = html.replace(/<script[^>]*>.*?<\\/script>/gis, '');\n  html = html.replace(/<style[^>]*>.*?<\\/style>/gis, '');\n  html = html.replace(/<[^>]+>/g, ' ');\n  html = decodeEntities(html);\n  html = html.replace(/s+/g, ' ').trim();\n  extractedText = html;\n} else {\n  extractedText = typeof data === 'string' ? data : JSON.stringify(data, null, 2);\n}\n\nif (extractedText.length > 4000) {\n  extractedText = extractedText.substring(0, 4000) + '... [truncated]';\n}\n\nreturn [{\n  json: {\n    text: extractedText,\n    url: $node['Parse Input'].json.url,\n    question: $node['Parse Input'].json.question,\n  },\n}];"
+      },
+      "id": "extract-content",
+      "name": "Extract Content",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [880, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Build agent prompt with explicit context\nconst question = $json.question;\nconst url = $json.url;\nconst text = $json.text ?? '';\n\nconst prompt = [\n  \"You are a concise assistant. Answer the question using ONLY the provided content.\",\n  \"URL: \" + url,\n  \"Question:\",\n  question,\n  \"---\",\n  \"Content:\",\n  text,\n].join(\"\\n\");\n\nreturn [{ json: { prompt, url, question } }];"
+      },
+      "id": "build-prompt",
+      "name": "Build Prompt",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1100, 300]
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.prompt}}",
+        "options": {
+          "systemMessage": "You are a concise assistant. Respond in 3-5 sentences followed by 3 short bullet points. Do not include analysis markers."
+        }
+      },
+      "id": "ai-agent-url",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [1320, 300]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "openai-chat-model",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [1320, 520],
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "answer",
+              "value": "={{$json.output || $json.response || $json.text || \"\"}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "format-agent-response",
+      "name": "Format Agent URL Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [1540, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Parse Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Input": {
+      "main": [
+        [
+          {
+            "node": "Fetch URL Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch URL Content": {
+      "main": [
+        [
+          {
+            "node": "Extract Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Content": {
+      "main": [
+        [
+          {
+            "node": "Build Prompt",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Prompt": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Format Agent URL Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "staticData": null,
+  "pinData": {}
+}

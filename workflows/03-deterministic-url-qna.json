@@ -1,0 +1,188 @@
+{
+  "name": "03 - URL Q&A (Deterministic LLM)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "question-url",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "Webhook-Question",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [260, 300],
+      "webhookId": "03-url-qna-webhook"
+    },
+    {
+      "parameters": {
+        "functionCode": "// Parse input for URL Q&A.\n// Webhook sends the parsed request body as $json or $json.body.\nconst root = $json ?? {};\nconst body = (root.body && typeof root.body === 'object') ? root.body : root;\n\nconst url = body.url;\nconst question = body.question;\n\nif (!url) {\n  throw new Error('Missing body.url');\n}\nif (!question) {\n  throw new Error('Missing body.question');\n}\n\nreturn [{\n  json: {\n    url,\n    question,\n    language: body.language ?? null,\n    model: body.model ?? null,\n  },\n}];"
+      },
+      "id": "Function-Parse",
+      "name": "Parse Input",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$json.url}}",
+        "options": {
+          "timeout": 30000,
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "HTTPRequest-Fetch",
+      "name": "Fetch URL Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [660, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract text content from HTML or return as-is.\nconst data = $json.data ?? $json.body ?? '';\nconst contentType = ($json.headers?.['content-type'] ?? '').toLowerCase();\n\nlet extractedText = '';\nlet extractedTitle = '';\n\nconst decodeEntities = (value) => {\n  return value\n    .replace(/&nbsp;/g, ' ')\n    .replace(/&amp;/g, '&')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/&quot;/g, '\"');\n};\n\nif (contentType.includes('application/json')) {\n  // JSON API response – pretty-print for the LLM.\n  extractedText = typeof data === 'string' ? data : JSON.stringify(data, null, 2);\n} else if (contentType.includes('text/html') || (typeof data === 'string' && data.includes('<html'))) {\n  // Simple HTML text extraction.\n  let html = typeof data === 'string' ? data : JSON.stringify(data);\n\n  // Extract title if present.\n  const titleMatch = html.match(/<title[^>]*>([^<]+)<\\/title>/i);\n  if (titleMatch) {\n    extractedTitle = titleMatch[1].trim();\n  }\n\n  // Remove script and style tags.\n  html = html.replace(/<script[^>]*>.*?<\\/script>/gis, '');\n  html = html.replace(/<style[^>]*>.*?<\\/style>/gis, '');\n\n  // Remove HTML tags.\n  html = html.replace(/<[^>]+>/g, ' ');\n\n  // Decode HTML entities.\n  html = decodeEntities(html);\n\n  // Clean up whitespace.\n  html = html.replace(/\\s+/g, ' ').trim();\n\n  extractedText = html;\n} else {\n  // Plain text or other content types.\n  extractedText = typeof data === 'string' ? data : JSON.stringify(data, null, 2);\n}\n\n// Limit text length (max ~4000 chars for LLM context).\nif (extractedText.length > 4000) {\n  extractedText = extractedText.substring(0, 4000) + '... [truncated]';\n}\n\nreturn [{\n  json: {\n    text: extractedText,\n    title: extractedTitle || $json.url,\n    url: $json.url,\n    question: $node['Parse Input'].json.question,\n    language: $node['Parse Input'].json.language,\n    model: $node['Parse Input'].json.model,\n  },\n}];"
+      },
+      "id": "Function-Extract",
+      "name": "Extract Content",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [860, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Build request for an OpenAI-compatible LLM (LM Studio, OpenRouter, etc.).\n// This node expects text + question + optional metadata on $json.\nconst root = $json ?? {};\n\nconst textRaw = root.text ?? '';\nconst text = (textRaw ?? '').toString().trim();\nif (!text) {\n  throw new Error('Missing body.text');\n}\n\nconst questionRaw = root.question ?? '';\nconst question = (questionRaw ?? '').toString().trim();\nif (!question) {\n  throw new Error('Missing body.question');\n}\n\n// Optional fields.\nconst title = root.title ?? null;\nconst url = root.url ?? null;\nconst language = root.language ?? null;\n\nconst model = root.model || $env.OPENAI_MODEL || 'openai/gpt-oss-20b';\nconst temperature = root.temperature ?? 0.3;\nconst max_tokens = root.max_tokens ?? 600;\n\nconst SYSTEM_QA_PROMPT =\n  'You are a concise assistant. Based on the provided content, answer the user\\'s question in 3–5 sentences ' +\n  'and then provide 3 short actionable bullet points. ' +\n  'If a language is specified, respond in that language. ' +\n  'Reply as plain text without special tokens (e.g. <|...|>) or meta markers.';\n\nconst system = root.system || SYSTEM_QA_PROMPT;\n\n// Base models like openai/gpt-oss-20b are not chat-tuned.\n// Prefer /completions with a prompt for stable text output.\nconst useCompletions = root.useCompletions ?? /openai\\/gpt-oss-20b/i.test(model);\n\nconst apiBase = $env.OPENAI_API_BASE || 'http://host.docker.internal:1234/v1';\nconst apiUrl = apiBase + (useCompletions ? '/completions' : '/chat/completions');\n\nconst headers = {\n  Authorization: 'Bearer ' + ($env.OPENAI_API_KEY || 'lm-studio'),\n  'Content-Type': 'application/json',\n};\n\nlet payload;\nif (useCompletions) {\n  const promptParts = [system];\n  if (title) promptParts.push(`Title: ${title}`);\n  if (url) promptParts.push(`Source URL: ${url}`);\n  if (language) promptParts.push(`Language: ${language}`);\n  promptParts.push(`Question: ${question}`);\n  promptParts.push('---', text);\n  const prompt = promptParts.join('\\n\\n');\n\n  payload = { model, prompt, temperature, max_tokens };\n} else {\n  const messages = [{ role: 'system', content: system }];\n  const metaLines = [];\n  if (title) metaLines.push(`Title: ${title}`);\n  if (url) metaLines.push(`Source URL: ${url}`);\n  if (language) metaLines.push(`Language: ${language}`);\n  if (metaLines.length > 0) {\n    messages.push({ role: 'system', content: metaLines.join('\\n') });\n  }\n  messages.push({ role: 'user', content: `Question: ${question}` });\n  messages.push({ role: 'user', content: `Content:\\n${text}` });\n\n  payload = { model, messages, temperature, max_tokens };\n}\n\nreturn [{ json: { apiUrl, headers, payload } }];"
+      },
+      "id": "Function-BuildBody",
+      "name": "Build LLM Request",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1060, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$json.apiUrl}}",
+        "sendHeaders": true,
+        "specifyHeaders": "json",
+        "jsonHeaders": "={{JSON.stringify($json.headers)}}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{JSON.stringify($json.payload)}}",
+        "options": {}
+      },
+      "id": "HTTPRequest-LLM",
+      "name": "LLM Q&A",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1330, 300]
+    },
+    {
+      "parameters": {
+        "functionCode": "// Normalise and clean the raw LLM response into summary + token usage.\nconst choice = $json.choices?.[0] ?? {};\nconst raw = choice.message?.content ?? choice.text ?? '';\n\nlet cleaned = raw.replace(/<\\|[^>]+?\\|>/g, '').trim();\n\n// Some models emit both analysis/final sections in one string.\nconst lower = cleaned.toLowerCase();\nconst markerIndex = lower.indexOf('assistantfinal');\nif (markerIndex !== -1) {\n  cleaned = cleaned.slice(markerIndex + 'assistantfinal'.length).trim();\n}\n\ncleaned = cleaned.replace(/^analysis\\s*/i, '').trim();\n\nconst usage = $json.usage ?? {};\nconst model = $node['Build LLM Request'].json?.payload?.model || $env.OPENAI_MODEL || 'openai/gpt-oss-20b';\nconst endpoint = $node['Build LLM Request'].json?.apiUrl || '';\n\nreturn [\n  {\n    json: {\n      summary: cleaned,\n      raw_choice: raw,\n      model: model,\n      endpoint: endpoint,\n      prompt_tokens: usage.prompt_tokens ?? 0,\n      completion_tokens: usage.completion_tokens ?? 0,\n      total_tokens: usage.total_tokens ?? 0,\n    },\n  },\n];"
+      },
+      "id": "Function-CleanOutput",
+      "name": "Clean LLM Output",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [1600, 300]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "summary",
+              "value": "={{$json[\"summary\"]}}"
+            },
+            {
+              "name": "raw_choice",
+              "value": "={{$json[\"raw_choice\"]}}"
+            },
+            {
+              "name": "model",
+              "value": "={{$node[\"Build LLM Request\"].json[\"payload\"][\"model\"]}}"
+            },
+            {
+              "name": "endpoint",
+              "value": "={{$node[\"Build LLM Request\"].json.apiUrl}}"
+            }
+          ],
+          "number": [
+            {
+              "name": "prompt_tokens",
+              "value": "={{$json[\"prompt_tokens\"]}}"
+            },
+            {
+              "name": "completion_tokens",
+              "value": "={{$json[\"completion_tokens\"]}}"
+            },
+            {
+              "name": "total_tokens",
+              "value": "={{$json[\"total_tokens\"]}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "Set-FormatResponse",
+      "name": "Format Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [1860, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.NOTIFICATION_WEBHOOK_URL || 'https://your-webhook-url.com/endpoint'}}",
+        "sendHeaders": true,
+        "specifyHeaders": "keyPair",
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{JSON.stringify($json)}}",
+        "options": {
+          "timeout": 10000,
+          "ignoreResponseCode": true
+        }
+      },
+      "id": "HTTPRequest-Notification",
+      "name": "Optional: HTTP Webhook Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1860, 480],
+      "disabled": true,
+      "notes": "Optional: Sends the Q&A result to an external webhook. Configure NOTIFICATION_WEBHOOK_URL in environment variables or edit the URL directly. Disabled by default to avoid affecting existing tests."
+    }
+  ],
+  "connections": {
+    "Webhook": { "main": [[{ "node": "Parse Input", "type": "main", "index": 0 }]] },
+    "Parse Input": { "main": [[{ "node": "Fetch URL Content", "type": "main", "index": 0 }]] },
+    "Fetch URL Content": { "main": [[{ "node": "Extract Content", "type": "main", "index": 0 }]] },
+    "Extract Content": { "main": [[{ "node": "Build LLM Request", "type": "main", "index": 0 }]] },
+    "Build LLM Request": { "main": [[{ "node": "LLM Q&A", "type": "main", "index": 0 }]] },
+    "LLM Q&A": { "main": [[{ "node": "Clean LLM Output", "type": "main", "index": 0 }]] },
+    "Clean LLM Output": {
+      "main": [
+        [
+          { "node": "Format Response", "type": "main", "index": 0 },
+          { "node": "Optional: HTTP Webhook Notification", "type": "main", "index": 0 }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "staticData": null,
+  "pinData": {}
+}

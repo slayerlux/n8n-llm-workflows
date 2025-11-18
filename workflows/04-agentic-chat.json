@@ -1,0 +1,115 @@
+{
+  "name": "04 - Chat (Agent Node, no tools)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent-chat",
+        "responseMode": "lastNode",
+        "options": {}
+      },
+      "id": "e3f4854f-2b7e-43bf-9603-98b1c0fd9057",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [-16, 128],
+      "webhookId": "523db8e2-3bee-4955-8904-d048a9e0d3a9"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{$json.body.input}}",
+        "options": {}
+      },
+      "id": "c3a10029-838a-4836-bf3c-475cfd6ccb24",
+      "name": "AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [192, 128]
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "openai/gpt-oss-20b",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "id": "24af2cc7-55e6-4dc5-9c52-441a461f63ff",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [64, 336],
+      "credentials": {
+        "openAiApi": {
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "answer",
+              "value": "={{$json.output || $json.response || $json.text || ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "Set-Agent-Response",
+      "name": "Format Agent Response",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [432, 128]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Format Agent Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "",
+  "meta": {
+    "templateId": "1954"
+  },
+  "tags": []
+}

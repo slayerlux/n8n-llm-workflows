@@ -1,0 +1,213 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "workflows:setup",
+      "detail": "Import and activate all workflows (01-05) in n8n",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "workflows:setup"],
+      "group": {
+        "kind": "build",
+        "isDefault": false
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": true,
+        "clear": false
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "workflows:import",
+      "detail": "Import all workflows from workflows/ directory to n8n (updates existing ones)",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "workflows:import"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "workflows:activate",
+      "detail": "Activate only project workflows (01-05) in n8n",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "workflows:activate"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "workflows:sample",
+      "detail": "Generate sample responses from all workflows and save to tests/output/samples/",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "workflows:sample"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "test:automated",
+      "detail": "Run automated tests (Vitest) - tests workflows and webhook endpoints",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "test"],
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "test:watch",
+      "detail": "Run tests in watch mode - automatically re-runs tests on file changes",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "test:watch"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "test:ui",
+      "detail": "Run interactive test UI (Vitest UI) in browser",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "test:ui"],
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "typecheck",
+      "detail": "Check TypeScript types without compilation (tsc --noEmit)",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "typecheck"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": "$tsc"
+    },
+    {
+      "label": "lint",
+      "detail": "Check code with ESLint (without fixing)",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "lint"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": "$eslint-stylish"
+    },
+    {
+      "label": "lint:fix",
+      "detail": "Check and automatically fix ESLint errors",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "lint:fix"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": "$eslint-stylish"
+    },
+    {
+      "label": "format",
+      "detail": "Format code with Prettier",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "format"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "check",
+      "detail": "Full check: typecheck + lint + format check",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "check"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": ["$tsc", "$eslint-stylish"]
+    },
+    {
+      "label": "build",
+      "detail": "Compile TypeScript code to JavaScript (tsc)",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["run", "build"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": "$tsc"
+    }
+  ]
+}

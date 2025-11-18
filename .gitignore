@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+package-lock.json
+yarn.lock
+.pnpm-store/
+
+# Environment variables
+.env
+.env.local
+
+# Test results
+coverage/
+.nyc_output/
+tests/output/
+
+# IDE
+# .vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Private/local files
+.private/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# n8n data (runtime data, should not be in repo)
+n8n_data/
+
+# Logs
+*.log
+npm-debug.log*
+
+# TypeScript
+dist/
+*.tsbuildinfo
+
+# ESLint
+.eslintcache

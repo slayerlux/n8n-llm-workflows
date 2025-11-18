@@ -1,0 +1,54 @@
+{
+  "name": "n8n-llm-workflows",
+  "version": "1.0.0",
+  "description": "n8n workflows and TypeScript client for LLM operations via HTTP API",
+  "type": "module",
+  "author": "blixerx",
+  "license": "MIT",
+  "keywords": [
+    "n8n",
+    "llm",
+    "workflow",
+    "automation",
+    "openai",
+    "typescript"
+  ],
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=8.0.0"
+  },
+  "packageManager": "pnpm@8.15.0",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:manual": "echo 'Run manual tests from tests/manual/ directory'",
+    "workflows:sample": "tsx scripts/sample-workflows.ts",
+    "workflows:import": "tsx scripts/import-workflows.ts",
+    "workflows:activate": "tsx scripts/activate-workflows.ts",
+    "workflows:setup": "tsx scripts/setup-workflows.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write \"**/*.{ts,js,json,md}\"",
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "check": "pnpm run typecheck && pnpm run lint && pnpm run format:check"
+  },
+  "dependencies": {
+    "axios": "^1.13.2",
+    "dotenv": "^16.6.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.25",
+    "@vitest/ui": "^1.6.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.6.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.4",
+    "vitest": "^1.6.1"
+  }
+}
